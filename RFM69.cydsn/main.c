@@ -31,16 +31,60 @@
 */
 
 #include "project.h"
+#include <core_cm0.h>
+
+void Setup_SysTick();
+void SysTick_IRQHandler();
+void Button_IRQHandler();
+
+void delay_ms(uint32_t ms);
+
+volatile uint32_t SysTick_Counter = 0;
+volatile uint32_t ButtonISR_Triggered = 0;
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-
+    
+    CySysTickInit();
+    CySysTickSetReload(24000);
+    
+    CySysTickEnableInterrupt();
+    CySysTickSetCallback(0, &SysTick_IRQHandler);
+    CySysTickStart();
+    
+    ButtonISR_StartEx(&Button_IRQHandler);
+    
     for(;;)
     {
-        /* Place your application code here. */
+        if (ButtonISR_Triggered)
+        {
+        }
+        else
+        {
+            __WFE();
+        }
+    }
+}
+
+void SysTick_IRQHandler()
+{
+    SysTick_Counter += 1;
+}
+
+void Button_IRQHandler()
+{
+    ButtonISR_Triggered = 0x01;
+    __SEV();
+}
+
+void delay_ms(uint32_t ms)
+{
+    const uint32_t stop = SysTick_Counter + ms;
+    
+    while (stop > SysTick_Counter)
+    {
+        __WFE();
     }
 }
 

@@ -65,12 +65,7 @@ void libspi_start_transaction(spi_t* spi_dev)
     
     if (0 == spi_dev->spi_transaction_counter)
     {
-        if (0 == (spi_dev->spi_platform_flags & libspi_is_psoc_wrapper))
-        {
-            // Use default target
-            libspi_psoc_default_start();
-        }
-        else
+        if (0 != (spi_dev->spi_platform_flags & libspi_is_psoc_wrapper))
         {
             // Use wrapped target
             wrapper = (libspi_psoc_wrapper_t*)spi_dev->spi_addr;
@@ -78,6 +73,15 @@ void libspi_start_transaction(spi_t* spi_dev)
             ASSERT_NOT_NULL(wrapper);
             
             wrapper->libspi_start();
+        }
+        else if ((NULL != spi_dev->spi_nss_gpio_bank))
+        {
+            libgpio_write_pin(spi_dev->spi_nss_gpio_bank, spi_dev->spi_nss_gpio_pin_number, libgpio_pin_state_low);
+        }
+        else
+        {
+            // Use default target
+            libspi_psoc_default_start();
         }
     }
     
@@ -94,12 +98,7 @@ void libspi_stop_transaction(spi_t* spi_dev)
     
     if (0 == spi_dev->spi_transaction_counter)
     {
-        if (0 == (spi_dev->spi_platform_flags & libspi_is_psoc_wrapper))
-        {
-            // Use default target
-            libspi_psoc_default_stop();
-        }
-        else
+        if (0 != (spi_dev->spi_platform_flags & libspi_is_psoc_wrapper))
         {
             // Use wrapped target
             wrapper = (libspi_psoc_wrapper_t*)spi_dev->spi_addr;
@@ -107,6 +106,15 @@ void libspi_stop_transaction(spi_t* spi_dev)
             ASSERT_NOT_NULL(wrapper);
             
             wrapper->libspi_stop();
+        }
+        else if ((NULL != spi_dev->spi_nss_gpio_bank))
+        {
+            libgpio_write_pin(spi_dev->spi_nss_gpio_bank, spi_dev->spi_nss_gpio_pin_number, libgpio_pin_state_high);
+        }
+        else
+        {
+            // Use default target
+            libspi_psoc_default_stop();
         }
     }
 }
