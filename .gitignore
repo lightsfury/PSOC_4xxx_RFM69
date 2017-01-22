@@ -1,1 +1,6 @@
 *.cywrk.*
+/RFM69.cydsn/codegentemp
+/RFM69.cydsn/CortexM0
+/RFM69.cydsn/Export
+/RFM69.cydsn/Generated_Source
+*.cyprj.*
